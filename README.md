@@ -35,7 +35,30 @@ RagProject/
 └── README.md                      # 说明文档
 ```
 
-## 安装依赖
+### 创建并激活Python虚拟环境
+
+为了隔离项目依赖，建议您使用Python虚拟环境。
+
+**Windows:**
+```cmd
+python -m venv venv
+venv\Scripts\activate
+```
+
+**Linux/Mac:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+###  可以一键安装依赖
+
+本项目使用 `requirements.txt` 文件来管理所有依赖。请运行以下命令进行安装：
+```bash
+pip install -r requirements.txt
+```
+
+##  或者分步使用pip安装依赖
 
 ```bash
 pip install langchain langchain-community
