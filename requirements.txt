@@ -1,0 +1,10 @@
+dashscope
+langchain
+langchain-community
+langchain-openai
+faiss-cpu
+sentence-transformers
+python-dotenv
+pandas
+beautifulsoup4
+lxml
