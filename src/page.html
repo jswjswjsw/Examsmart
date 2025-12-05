@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库智能问答助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Patrick+Hand&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --paper-color: #fdfbf7;
+            --line-color: #94a3b8;
+            --ink-color: #2c3e50;
+            --accent-color: #ff6b6b;
+            --highlight-color: #f1c40f;
+            --user-msg-bg: #e3f2fd;
+            --bot-msg-bg: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Patrick Hand', cursive, sans-serif;
+            background-color: var(--paper-color);
+            background-image:
+                linear-gradient(var(--line-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: center center;
+            color: var(--ink-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Sketchy Border Mixin equivalent */
+        .sketchy {
+            border: 2px solid var(--ink-color);
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+            /* Paper texture overlay effect */
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed var(--ink-color);
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Indie Flower', cursive;
+            font-size: 2.5rem;
+            margin: 0;
+            transform: rotate(-2deg);
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            /* Custom Scrollbar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--ink-color) transparent;
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background-color: var(--ink-color);
+            border-radius: 4px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            font-size: 1.2rem;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background-color: var(--bot-msg-bg);
+            border: 2px solid var(--ink-color);
+            border-radius: 25px 5px 20px 15px / 5px 20px 15px 25px;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--user-msg-bg);
+            border: 2px solid var(--ink-color);
+            border-radius: 15px 225px 15px 25px / 255px 15px 225px 15px;
+            transform: rotate(1deg);
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 2px dashed var(--ink-color);
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            border: 2px solid var(--ink-color);
+            border-radius: 255px 25px 225px 25px / 25px 225px 25px 255px;
+            background: transparent;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 2px 2px 0px var(--highlight-color);
+        }
+
+        button {
+            padding: 10px 25px;
+            font-family: 'Indie Flower', cursive;
+            font-size: 1.3rem;
+            font-weight: bold;
+            background-color: var(--accent-color);
+            color: white;
+            border: 2px solid var(--ink-color);
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button:hover {
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .upload-btn {
+            padding: 0;
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            background-color: #fff;
+            color: var(--ink-color);
+            border-radius: 50% 40% 60% 50% / 50% 60% 40% 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--ink-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .message img {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 2px solid var(--ink-color);
+            margin-top: 5px;
+            background: #fff;
+        }
+
+        /* Doodle Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotate(2deg);
+            }
+        }
+
+        @keyframes wiggle {
+
+            0%,
+            100% {
+                transform: rotate(-2deg);
+            }
+
+            50% {
+                transform: rotate(2deg);
+            }
+        }
+
+        /* Doodle decorations */
+        .doodle {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.7;
+            z-index: 0;
+            stroke: var(--ink-color);
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .star {
+            top: -25px;
+            right: -25px;
+            width: 60px;
+            height: 60px;
+            fill: var(--highlight-color);
+            stroke: var(--ink-color);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .arrow-doodle {
+            bottom: 80px;
+            left: -40px;
+            width: 60px;
+            height: 60px;
+            transform: rotate(-20deg);
+        }
+
+        .spiral-doodle {
+            top: 50px;
+            right: -50px;
+            width: 80px;
+            height: 80px;
+            opacity: 0.4;
+        }
+
+        .scribble-doodle {
+            bottom: -30px;
+            right: 20%;
+            width: 120px;
+            height: 40px;
+            opacity: 0.3;
+            stroke: var(--accent-color);
+        }
+
+        .bulb-doodle {
+            top: -40px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            stroke: var(--highlight-color);
+            animation: wiggle 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container sketchy">
+        <!-- Decorative Doodles -->
+        <svg class="doodle star" viewBox="0 0 50 50">
+            <path d="M25 1 L31 18 L49 18 L35 29 L40 46 L25 36 L10 46 L15 29 L1 18 L19 18 Z" />
+        </svg>
+
+        <svg class="doodle arrow-doodle" viewBox="0 0 100 100">
+            <path d="M10 90 Q 50 10 90 50 M 80 40 L 90 50 L 75 60" />
+        </svg>
+
+        <svg class="doodle spiral-doodle" viewBox="0 0 100 100">
+            <path
+                d="M50 50 m -30 0 a 30 30 0 1 0 60 0 a 30 30 0 1 0 -60 0 m 10 0 a 20 20 0 1 0 40 0 a 20 20 0 1 0 -40 0" />
+        </svg>
+
+        <svg class="doodle bulb-doodle" viewBox="0 0 50 50">
+            <path d="M15 30 Q 15 10 25 10 Q 35 10 35 30 M 20 30 L 20 35 L 30 35 L 30 30 M 22 38 L 28 38" />
+            <line x1="25" y1="5" x2="25" y2="1" />
+            <line x1="10" y1="15" x2="6" y2="12" />
+            <line x1="40" y1="15" x2="44" y2="12" />
+        </svg>
+
+        <svg class="doodle scribble-doodle" viewBox="0 0 200 50">
+            <path d="M10 25 Q 30 5 50 25 T 90 25 T 130 25 T 170 25" stroke-width="3" />
+        </svg>
+
+        <header>
+            <h1>Knowledge Bot</h1>
+        </header>
+
+        <div class="chat-area" id="chatArea">
+            <div class="message bot">
+                你好！我是你的知识库助手。有什么我可以帮你的吗？
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <button class="upload-btn" id="uploadBtn" title="上传图片">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+            </button>
+            <input type="text" id="userInput" placeholder="在此写下你的问题..." autocomplete="off">
+            <button id="sendBtn">发送</button>
+        </div>
+    </div>
+
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const imageInput = document.getElementById('imageInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        function addMessage(content, sender, isHtml = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+            if (isHtml) {
+                msgDiv.innerHTML = content;
+            } else {
+                msgDiv.textContent = content;
+            }
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        uploadBtn.addEventListener('click', () => imageInput.click());
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgHtml = `<img src="${e.target.result}" alt="Uploaded Image">`;
+                    addMessage(imgHtml, 'user', true);
+                    // Simulate bot response to image
+                    setTimeout(() => {
+                        addMessage("收到你的图片了！很有趣。", 'bot');
+                    }, 1000);
+                };
+                reader.readAsDataURL(file);
+                imageInput.value = '';
+            }
+        });
+
+        function handleSend() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Add User Message
+            addMessage(text, 'user');
+            userInput.value = '';
+
+            // Simulate Bot Response (Loading effect could be added here)
+            setTimeout(() => {
+                const responses = [
+                    "这是一个很有趣的问题！让我查查知识库...",
+                    "根据我的记录，这涉及到...",
+                    "我明白你的意思了。",
+                    "请稍等，正在检索相关信息..."
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addMessage(randomResponse, 'bot');
+            }, 1000);
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+{
+  "collection": "rag_material",
+  "count": 992,
+  "persist_directory": "D:\\RagProject\\target\\chroma",
+  "embedding_model": "BAAI/bge-m3",
+  "provider": "SiliconFlow (OpenAI兼容API)"
+}
